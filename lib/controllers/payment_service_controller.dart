@@ -140,11 +140,13 @@ class PaymentServiceController extends GetxController {
         RemisionID = responseText.replaceAll("Insertado correctamente ID:", "");
         generateReport();
         CoolAlert.show(
-            context: context,
-            type: CoolAlertType.success,
-            title: 'Venta creada',
-            text: "${responseSellText}\n${Folio}",
-            confirmBtnColor: const Color(0xff278ea5));
+          context: context,
+          type: CoolAlertType.success,
+          title: 'Venta creada',
+          text: "${responseSellText}\n${Folio}",
+          confirmBtnColor: const Color(0xff278ea5),
+          onConfirmBtnTap: RatingBar(context),
+        );
       } else {
         //Credito o Debito con firma o sin firma electronica
         if (int.tryParse(userData.accesoCobro!) == 0) {
@@ -159,11 +161,13 @@ class PaymentServiceController extends GetxController {
               responseText.replaceAll("Insertado correctamente ID:", "");
           generateReport();
           CoolAlert.show(
-              context: context,
-              type: CoolAlertType.success,
-              title: 'Venta creada',
-              text: "${responseSellText}\n${Folio}",
-              confirmBtnColor: const Color(0xff278ea5));
+            context: context,
+            type: CoolAlertType.success,
+            title: 'Venta creada',
+            text: "${responseSellText}\n${Folio}",
+            confirmBtnColor: const Color(0xff278ea5),
+            onConfirmBtnTap: RatingBar(context),
+          );
         } else {
           try {
             await getSell(totalSell!, Folio.toString())
@@ -193,6 +197,7 @@ class PaymentServiceController extends GetxController {
                     title: 'Venta creada',
                     text: "${responseSellText}\n${Folio}",
                     confirmBtnColor: const Color(0xff278ea5),
+                    onConfirmBtnTap: RatingBar(context)
                 );
               } else {
                 CoolAlert.show(
@@ -200,7 +205,8 @@ class PaymentServiceController extends GetxController {
                     type: CoolAlertType.error,
                     title: 'Venta NO creada',
                     text: "${responseSellText}",
-                    confirmBtnColor: const Color(0xff273e));
+                    confirmBtnColor: const Color(0xff273e)
+                );
               }
             });
           } catch (err) {
@@ -212,7 +218,6 @@ class PaymentServiceController extends GetxController {
       print("BUTTON IS NOT ACTIVE...");
       return null;
     }
-    RatingBar(context);
   }
 
   Future<dynamic> generateReport() async {
@@ -241,7 +246,7 @@ class PaymentServiceController extends GetxController {
   RatingBar(BuildContext context) {
     CoolAlert.show(
         context: context,
-        type: CoolAlertType.custom,
+        type: CoolAlertType.success,
         title: 'Calidad del servicio',
         text: "Califica nuestro servicio",
         confirmBtnColor: const Color(0xff278ea5),
