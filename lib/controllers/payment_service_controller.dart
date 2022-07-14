@@ -13,6 +13,7 @@ import 'package:pos_hotel/data/provider/api.dart';
 import 'package:pos_hotel/data/repository/auth_repository.dart';
 import 'package:pos_hotel/entities/remission_entity.dart';
 import 'package:pos_hotel/entities/user_data.dart';
+import 'package:pos_hotel/pages/tip_screen.dart';
 import 'package:pos_hotel/utils/data_information.dart';
 import 'package:pos_hotel/utils/utilitysp.dart';
 import 'package:quiver/async.dart';
@@ -21,8 +22,10 @@ class PaymentServiceController extends GetxController {
   final AuthRepository repository = AuthRepository(apiClient: Api());
   UserData userData = DataInformation().readUserInfo();
 
-  final quantityRemissionTextCtrl = TextEditingController(text: "1");
-  final totalRemissionTotalRemissionCtrl = TextEditingController(text: "0");
+  final quantityRemissionTextCtrl = TextEditingController(text: "");
+  final totalRemissionTotalRemissionCtrl = TextEditingController(text: "");
+  final tipAnotherAmount = TextEditingController(text: "0");
+  final tipAnotherPercentage = TextEditingController(text: "0");
 
   String dropdownServiceValue = 'Hospedaje';
   String dropdownMethodPaymentValue = '1-Efectivo';
@@ -37,10 +40,11 @@ class PaymentServiceController extends GetxController {
   double? unitPrice = 0.0;
   int quantity = 1;
   int Folio = 0;
+  double tip = 0.0;
 
   bool isButtonActive = true;
   int _start = 10;
-  int _current = 10;
+  int current = 10;
 
   UtilitySP utility = UtilitySP();
 
@@ -63,11 +67,11 @@ class PaymentServiceController extends GetxController {
 
   var jsonDesialization;
 
-  Future<dynamic> getSell(double _amount, String _folio) async {
+  Future<dynamic> getSell(double _amount, String _folio, double _tip) async {
     String _statusSell;
     try {
-      final String result = await platform
-          .invokeMethod('getSell', {'amount': _amount, 'folio': _folio});
+      final String result = await platform.invokeMethod(
+          'getSell', {'amount': _amount, 'folio': _folio, 'tip': _tip});
       //_statusSell = 'Venta $result';
 
       jsonDesialization = jsonDecode(result);
@@ -119,6 +123,7 @@ class PaymentServiceController extends GetxController {
           clienteId: int.tryParse(userData.clienteID!),
           cantidad: int.parse(quantityRemissionTextCtrl.text),
           folio: Folio,
+          tip: tip,
           descripcion: dropdownServiceValue,
           precioUnitario: unitPrice,
           totalSell: totalSell,
@@ -170,10 +175,11 @@ class PaymentServiceController extends GetxController {
           );
         } else {
           try {
-            await getSell(totalSell!, Folio.toString())
+            await getSell(totalSell!, Folio.toString(), tip)
                 .then((responseSell) async {
               //log(.toString());
               responseSellText = responseSell['message'];
+              remissionEntity.tip = responseSell['tip'];
               remissionEntity.campoAdicional1 = responseSell['orderId'];
               remissionEntity.campoAdicional2 = responseSell['spanRoute'];
               remissionEntity.campoAdicional3 = responseSell['cardTypeName'];
@@ -218,6 +224,9 @@ class PaymentServiceController extends GetxController {
       print("BUTTON IS NOT ACTIVE...");
       return null;
     }
+    tipAnotherPercentage.text = "0";
+    tipAnotherAmount.text = "0";
+    RatingBar(context);
   }
 
   Future<dynamic> generateReport() async {
@@ -275,6 +284,66 @@ class PaymentServiceController extends GetxController {
       sub.cancel();
     });
   }
+
+  getTip(int percentage) {
+    double tempTip = double.parse(totalRemissionTotalRemissionCtrl.text) *
+        (percentage / 100);
+    return "\$" + tempTip.toStringAsFixed(2) + " MXN";
+  }
+
+  tipValue(TipAmounts percentage) {
+    switch (percentage) {
+      case TipAmounts.ten:
+        tip = double.parse(totalRemissionTotalRemissionCtrl.text) * .1;
+        break;
+      case TipAmounts.fifteen:
+        tip = double.parse(totalRemissionTotalRemissionCtrl.text) * .15;
+        break;
+      case TipAmounts.twenty:
+        tip = double.parse(totalRemissionTotalRemissionCtrl.text) * .2;
+        break;
+      case TipAmounts.otherAmount:
+        tip = double.parse(tipAnotherAmount.text);
+        break;
+      case TipAmounts.otherPercentage:
+        tip = double.parse(totalRemissionTotalRemissionCtrl.text) *
+            (double.parse(tipAnotherPercentage.text) / 100);
+        break;
+      default:
+        tip = 0;
+        break;
+    }
+  }
+
+  verifyTotal() {
+    double tempTotal = totalRemissionTotalRemissionCtrl.text.isEmpty
+        ? 0
+        : double.parse(totalRemissionTotalRemissionCtrl.text);
+    if (!tempTotal.isNaN && tempTotal > 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  bool verifyAmount() {
+    double tempQuantity = quantityRemissionTextCtrl.text.isEmpty
+        ? 0
+        : double.parse(quantityRemissionTextCtrl.text);
+    return (tempQuantity.toInt() == tempQuantity.roundToDouble()) &&
+        tempQuantity > 0;
+  }
+
+  verifyTip(TipAmounts tipAmounts) {
+    if ((tipAmounts == TipAmounts.otherPercentage ||
+            tipAmounts == TipAmounts.otherAmount) &&
+        tip > (double.parse(totalRemissionTotalRemissionCtrl.text) * .25) &&
+        tip != 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 
 class ratingBar extends StatelessWidget {
@@ -290,8 +359,8 @@ class ratingBar extends StatelessWidget {
       direction: Axis.horizontal,
       allowHalfRating: true,
       itemCount: 5,
-      itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-      itemBuilder: (context, _) => Icon(
+      itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+      itemBuilder: (context, _) => const Icon(
         Icons.star,
         color: Colors.amber,
       ),

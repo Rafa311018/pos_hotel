@@ -72,10 +72,13 @@ class MainActivity: FlutterActivity() {
 
                 val amount = call.argument<Double>("amount")
                 val folio = call.argument<String>("folio")
+                val tip = call.argument<Double>("tip")
 
                 val createSell = amount?.let {
                     if (folio != null) {
-                        getSell(it, folio)
+                        if (tip != null) {
+                            getSell(it, folio, tip)
+                        }
                     }
                 };
 
@@ -180,8 +183,8 @@ class MainActivity: FlutterActivity() {
         }
     }
 
-    private fun getSell(_amount : Double, _folio: String): String{
-        val sale = SaleRequest("com.brillianttech.pos_hotel", amount = _amount, folio = _folio)
+    private fun getSell(_amount : Double, _folio: String, _tip: Double): String{
+        val sale = SaleRequest("com.brillianttech.pos_hotel", amount = _amount, folio = _folio, tip = _tip)
 
         try {
             smartApi.doTrans(sale)
