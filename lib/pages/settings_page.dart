@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pos_hotel/controllers/settings_controller.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key, this.deviceID = '', this.empresaID = ''})
       : super(key: key);
 
@@ -10,13 +10,19 @@ class SettingsPage extends StatelessWidget {
   final String empresaID;
 
   @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+
+  @override
   Widget build(BuildContext context) {
     final settingsController =
         Get.lazyPut(() => SettingsController(), fenix: true);
 
     return GetBuilder<SettingsController>(builder: (_) {
-      _.deviceIDArg = deviceID;
-      _.empresaIDArg = empresaID;
+      _.deviceIDArg = widget.deviceID;
+      _.empresaIDArg = widget.empresaID;
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -72,7 +78,7 @@ class SettingsPage extends StatelessWidget {
                   decoration: const InputDecoration(
                       labelText: "DeviceID",
                       contentPadding: EdgeInsets.all(25.0)),
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.text,
                 ),
               ),
               Padding(
@@ -102,7 +108,7 @@ class SettingsPage extends StatelessWidget {
                   decoration: const InputDecoration(
                       labelText: "Permiso",
                       contentPadding: EdgeInsets.all(25.0)),
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.text,
                 ),
               ),
               Padding(

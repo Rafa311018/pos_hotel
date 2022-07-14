@@ -3,6 +3,7 @@ class RemissionEntity {
     this.empresaId,
     this.clienteId,
     this.cantidad,
+    this.tip,
     this.folio,
     this.descripcion,
     this.precioUnitario,
@@ -17,6 +18,7 @@ class RemissionEntity {
   int? empresaId;
   int? clienteId;
   int? cantidad;
+  double? tip;
   int? folio;
   String? descripcion;
   double? precioUnitario;
