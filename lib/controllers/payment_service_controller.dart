@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:developer';
+
 import 'package:cool_alert/cool_alert.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -142,11 +145,13 @@ class PaymentServiceController extends GetxController {
         RemisionID = responseText.replaceAll("Insertado correctamente ID:", "");
         generateReport();
         CoolAlert.show(
-            context: context,
-            type: CoolAlertType.success,
-            title: 'Venta creada',
-            text: "${responseSellText}\n${Folio}",
-            confirmBtnColor: const Color(0xff278ea5));
+          context: context,
+          type: CoolAlertType.success,
+          title: 'Venta creada',
+          text: "${responseSellText}\n${Folio}",
+          confirmBtnColor: const Color(0xff278ea5),
+          onConfirmBtnTap: RatingBar(context),
+        );
       } else {
         //Credito o Debito con firma o sin firma electronica
         if (int.tryParse(userData.accesoCobro!) == 0) {
@@ -161,11 +166,13 @@ class PaymentServiceController extends GetxController {
               responseText.replaceAll("Insertado correctamente ID:", "");
           generateReport();
           CoolAlert.show(
-              context: context,
-              type: CoolAlertType.success,
-              title: 'Venta creada',
-              text: "${responseSellText}\n${Folio}",
-              confirmBtnColor: const Color(0xff278ea5));
+            context: context,
+            type: CoolAlertType.success,
+            title: 'Venta creada',
+            text: "${responseSellText}\n${Folio}",
+            confirmBtnColor: const Color(0xff278ea5),
+            onConfirmBtnTap: RatingBar(context),
+          );
         } else {
           try {
             await getSell(totalSell!, Folio.toString(), tip)
@@ -191,11 +198,12 @@ class PaymentServiceController extends GetxController {
                 RemisionID =
                     responseText.replaceAll("Insertado correctamente ID:", "");
                 CoolAlert.show(
-                  context: context,
-                  type: CoolAlertType.success,
-                  title: 'Venta creada',
-                  text: "${responseSellText}\n${Folio}",
-                  confirmBtnColor: const Color(0xff278ea5),
+                    context: context,
+                    type: CoolAlertType.success,
+                    title: 'Venta creada',
+                    text: "${responseSellText}\n${Folio}",
+                    confirmBtnColor: const Color(0xff278ea5),
+                    onConfirmBtnTap: RatingBar(context)
                 );
               } else {
                 CoolAlert.show(
@@ -203,7 +211,8 @@ class PaymentServiceController extends GetxController {
                     type: CoolAlertType.error,
                     title: 'Venta NO creada',
                     text: "${responseSellText}",
-                    confirmBtnColor: const Color(0xff273e));
+                    confirmBtnColor: const Color(0xff273e)
+                );
               }
             });
           } catch (err) {
@@ -246,11 +255,12 @@ class PaymentServiceController extends GetxController {
   RatingBar(BuildContext context) {
     CoolAlert.show(
         context: context,
-        type: CoolAlertType.custom,
+        type: CoolAlertType.success,
         title: 'Calidad del servicio',
         text: "Califica nuestro servicio",
         confirmBtnColor: const Color(0xff278ea5),
-        widget: ratingBar());
+        widget: ratingBar()
+    );
   }
 
   void startTimer() {
@@ -262,8 +272,8 @@ class PaymentServiceController extends GetxController {
 
     var sub = countDownTimer.listen(null);
     sub.onData((duration) {
-      current = _start - duration.elapsed.inSeconds;
-      print("CURRENT:$current");
+      _current = _start - duration.elapsed.inSeconds;
+      print("CURRENT:$_current");
     });
 
     sub.onDone(() {
